@@ -2,7 +2,7 @@ use crate::node::model::Node;
 use crate::state::AppState;
 use derust::databasex::{PostgresTransaction, Repository};
 use derust::httpx::{AppContext, HttpError, HttpTags};
-use sqlx::QueryBuilder;
+use sqlx::{QueryBuilder, query_as};
 
 impl Node {
     /// Upserts multiple nodes into the database in batches.
@@ -39,6 +39,30 @@ impl Node {
         }
 
         Ok(results)
+    }
+
+    /// Retrieves all nodes from the database.
+    ///
+    /// This method fetches all node records without any filtering or pagination.
+    /// It can be executed within an existing transaction or as a standalone query.
+    ///
+    /// # Arguments
+    ///
+    /// * `context` - Application context containing database connection and configuration
+    /// * `transaction` - Optional database transaction for atomic operations
+    /// * `tags` - HTTP tags for error context and tracing
+    ///
+    /// # Returns
+    ///
+    /// Returns `Ok(Vec<Node>)` containing all nodes in the database,
+    /// or `Err(HttpError)` if the database operation fails.
+    pub(super) async fn find_all(
+        context: &AppContext<AppState>,
+        mut transaction: Option<&mut PostgresTransaction<'_, AppState>>,
+        tags: &HttpTags,
+    ) -> Result<Vec<Node>, HttpError> {
+        let query = query_as("select * from node");
+        transaction.fetch_all(context, "Node.find_all", query, tags).await
     }
 }
 
