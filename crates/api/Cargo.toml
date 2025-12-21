@@ -1,0 +1,20 @@
+[package]
+name = "bipa-api"
+version = "0.0.1"
+edition = "2024"
+authors = ["Deroldo <diogoderoldo@gmail.com>"]
+categories = ["web-programming"]
+
+[dependencies]
+bipa-core = { path = "../core" }
+
+derust = { workspace = true }
+
+tokio = { workspace = true }
+axum = { workspace = true }
+tower-http = { workspace = true }
+swagger-ui-dist = { workspace = true }
+
+chrono = { workspace = true }
+
+tracing = { workspace = true }

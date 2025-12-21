@@ -1,0 +1,81 @@
+version: '3'
+
+tasks:
+  setup:
+    silent: true
+    cmds:
+      - cargo install cargo-nextest
+
+  build:
+    silent: true
+    cmds:
+      - task: build:default
+
+  build:default:
+    silent: true
+    cmds:
+      - cargo build
+
+  build:release:
+    silent: true
+    cmds:
+      - cargo build --release
+
+  test:
+    silent: true
+    cmds:
+      - task: test:default
+
+  test:default:
+    silent: true
+    cmds:
+      - docker-compose up -d
+      - cargo nextest run
+
+  lint:
+    silent: true
+    cmds:
+      - task: lint:default
+
+  lint:default:
+    silent: true
+    cmds:
+      - cargo fmt --all -- --check
+      - cargo clippy -- -D warnings
+
+  lint:fix:
+    silent: true
+    cmds:
+      - cargo fmt --all
+      - cargo clippy
+
+  run:
+    silent: true
+    cmds:
+      - task: run:api
+
+  run:api:
+    silent: true
+    cmds:
+      - docker-compose up -d
+      - cargo run -p bipa-api
+
+  docker:up:
+    silent: true
+    cmds:
+      - docker-compose up
+
+  docker:down:
+    silent: true
+    cmds:
+      - docker-compose down
+
+  docker:destroy:
+    silent: true
+    cmds:
+      - docker-compose down -v
+
+  clean:
+    silent: true
+    cmds:
+      - sh rust_cleaner.sh

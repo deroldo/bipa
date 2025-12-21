@@ -1,0 +1,22 @@
+[package]
+name = "bipa-core"
+version = "0.0.1"
+edition = "2024"
+authors = ["Deroldo <diogoderoldo@gmail.com>"]
+license = "MIT"
+
+[features]
+premium = []
+
+[dependencies]
+derust = { workspace = true }
+
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+regex = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }
+rand = { workspace = true }
+test-context = { workspace = true }
