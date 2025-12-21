@@ -1,5 +1,6 @@
 services:
   postgres:
+    container_name: bipa_postgres
     image: postgres:15-alpine
     environment:
       POSTGRES_PASSWORD: "local"
@@ -17,6 +18,7 @@ services:
       retries: 10
 
   localstack:
+    container_name: bipa_localstack
     image: localstack/localstack:3.0.2
     ports:
       - "127.0.0.1:4510-4559:4510-4559"

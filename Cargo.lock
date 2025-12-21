@@ -677,11 +677,14 @@ dependencies = [
 name = "bipa-core"
 version = "0.0.1"
 dependencies = [
+ "chrono",
  "derust",
  "rand 0.9.2",
  "regex",
+ "rust_decimal",
  "serde",
  "serde_json",
+ "sqlx",
  "test-context",
  "tokio",
 ]

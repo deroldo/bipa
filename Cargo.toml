@@ -17,6 +17,7 @@ tokio = { version = "1.48.0", features = ["full"] }
 axum = { version = "0.8.8", default-features = true, features = ["macros", "tokio"] }
 tower-http = { version = "0.6.8", features = ["cors"] }
 sqlx = { version = "0.8.6", features = ["chrono", "uuid"] }
+rust_decimal = { version = "1.39.0", features = ["serde", "serde_json"] }
 
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.145", features = ["preserve_order"] }

@@ -5,4 +5,5 @@ use serde::Deserialize;
 pub struct AppConfig {
     pub port: Option<u16>,
     pub database: DatabaseConfig,
+    pub bitcoin_sats: f64,
 }
