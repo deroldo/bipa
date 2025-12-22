@@ -2,16 +2,15 @@ use crate::error::CustomError;
 use chrono::{DateTime, Utc};
 use derust::StatusCode;
 use derust::httpx::{HttpError, HttpTags};
-use rust_decimal::Decimal;
-use rust_decimal::prelude::FromPrimitive;
 use sqlx::FromRow;
+use sqlx::types::BigDecimal;
 
 #[derive(Clone, FromRow)]
 pub struct Node {
     pub id: i64,
     pub public_key: String,
     pub alias: String,
-    pub capacity: Decimal,
+    pub capacity: BigDecimal,
     pub first_seen: DateTime<Utc>,
 }
 
@@ -35,7 +34,7 @@ impl Node {
     /// Returns `Ok(Node)` with a new node instance having `id` set to 0, or
     /// `Err(HttpError)` if the timestamp is invalid.
     pub fn new(
-        bitcoin_sats: f64,
+        bitcoin_sats: u64,
         public_key: String,
         alias: String,
         sats: u64,
@@ -46,7 +45,7 @@ impl Node {
             id: 0,
             public_key,
             alias,
-            capacity: Decimal::from_f64(sats as f64 / bitcoin_sats).unwrap(),
+            capacity: BigDecimal::from(sats) / BigDecimal::from(bitcoin_sats),
             first_seen: DateTime::from_timestamp(first_seen, 0).ok_or(HttpError::business(
                 StatusCode::BAD_REQUEST,
                 &format!("Invalid first_seen={first_seen}"),
@@ -61,12 +60,12 @@ mod tests {
     use crate::node::model::Node;
     use chrono::{Timelike, Utc};
     use derust::httpx::HttpTags;
-    use rust_decimal::Decimal;
-    use rust_decimal::prelude::FromPrimitive;
+    use sqlx::types::BigDecimal;
+    use std::str::FromStr;
 
     #[test]
     fn should_create_node_with_valid_data() {
-        let bitcoin_sats = 100_000_000.0;
+        let bitcoin_sats = 100_000_000;
         let public_key = "test_public_key";
         let alias = "test_alias";
         let datetime = Utc::now();
@@ -83,7 +82,7 @@ mod tests {
 
         assert_eq!(node.public_key, public_key);
         assert_eq!(node.alias, alias);
-        assert_eq!(node.capacity, Decimal::from_f64(0.00550000).unwrap());
+        assert_eq!(node.capacity, BigDecimal::from_str("0.0055").unwrap());
         assert_eq!(node.first_seen, datetime.with_nanosecond(0).unwrap());
     }
 }

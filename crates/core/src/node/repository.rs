@@ -77,7 +77,7 @@ async fn upsert_chunks(
     builder.push_values(nodes, |mut b, node| {
         b.push_bind(&node.public_key)
             .push_bind(&node.alias)
-            .push_bind(node.capacity)
+            .push_bind(&node.capacity)
             .push_bind(node.first_seen);
     });
 

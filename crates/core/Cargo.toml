@@ -5,6 +5,9 @@ edition = "2024"
 authors = ["Deroldo <diogoderoldo@gmail.com>"]
 license = "MIT"
 
+[features]
+test_support = []
+
 [dependencies]
 derust = { workspace = true }
 
@@ -12,12 +15,10 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 
 sqlx = { workspace = true }
-rust_decimal = { workspace = true }
 chrono = { workspace = true }
 
 regex = { workspace = true }
 
-[dev-dependencies]
 tokio = { workspace = true }
 rand = { workspace = true }
 test-context = { workspace = true }

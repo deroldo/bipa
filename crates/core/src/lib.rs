@@ -4,5 +4,5 @@ pub mod error;
 pub mod node;
 pub mod state;
 
-#[cfg(test)]
-mod test_support;
+#[cfg(any(test, feature = "test_support"))]
+pub mod test_support;

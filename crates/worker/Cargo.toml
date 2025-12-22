@@ -1,0 +1,24 @@
+[package]
+name = "bipa-worker"
+version = "0.0.1"
+edition = "2024"
+authors = ["Deroldo <diogoderoldo@gmail.com>"]
+categories = ["web-programming"]
+
+[dependencies]
+bipa-core = { path = "../core", features = ["test_support"] }
+
+tokio = { workspace = true }
+tracing = { workspace = true }
+
+derust = { workspace = true }
+
+reqwest = { workspace = true }
+
+serde = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+test-context = { workspace = true }
+wiremock = "0.6.2"
+serde_json = { workspace = true }

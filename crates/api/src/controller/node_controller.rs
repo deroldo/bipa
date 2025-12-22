@@ -41,8 +41,8 @@ mod tests {
     #[tokio::test]
     async fn should_find_nodes(ctx: &mut HttpContext) -> Result<(), Box<dyn Error>> {
         // given
-        let node_1 = Fixture::create_node();
-        let node_2 = Fixture::create_node();
+        let node_1 = Fixture::create_node(None);
+        let node_2 = Fixture::create_node(Some(550_000));
 
         NodeUseCase::insert_nodes(&ctx.context, &vec![node_1.clone(), node_2.clone()], &HttpTags::default()).await?;
 
@@ -61,12 +61,12 @@ mod tests {
 
         Assertions::json_path_any_assert_eq(&json, "$[*].public_key", &node_1.public_key);
         Assertions::json_path_any_assert_eq(&json, "$[*].alias", &node_1.alias);
-        Assertions::json_path_any_assert_eq(&json, "$[*].capacity", &node_1.capacity.to_string());
+        Assertions::json_path_any_assert_eq(&json, "$[*].capacity", &format!("{:.8}", node_1.capacity));
         Assertions::json_path_any_assert_eq_date(&json, "$[*].first_seen", &node_1.first_seen);
 
         Assertions::json_path_any_assert_eq(&json, "$[*].public_key", &node_2.public_key);
         Assertions::json_path_any_assert_eq(&json, "$[*].alias", &node_2.alias);
-        Assertions::json_path_any_assert_eq(&json, "$[*].capacity", &node_2.capacity.to_string());
+        Assertions::json_path_any_assert_eq(&json, "$[*].capacity", "0.00550000");
         Assertions::json_path_any_assert_eq_date(&json, "$[*].first_seen", &node_2.first_seen);
 
         Ok(())
