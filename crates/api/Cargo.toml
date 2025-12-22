@@ -12,9 +12,16 @@ derust = { workspace = true }
 
 tokio = { workspace = true }
 axum = { workspace = true }
-tower-http = { workspace = true }
 swagger-ui-dist = { workspace = true }
 
+rust_decimal = { workspace = true }
 chrono = { workspace = true }
+serde = { workspace = true }
 
-tracing = { workspace = true }
+[dev-dependencies]
+tokio = { workspace = true }
+rand = { workspace = true }
+test-context = { workspace = true }
+reqwest = { workspace = true }
+serde_json = { workspace = true }
+jsonpath_lib = { workspace = true }

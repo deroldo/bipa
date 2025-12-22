@@ -1,8 +1,8 @@
-use crate::node::model::Node;
 use crate::test_support::Fixture;
 use derust::httpx::HttpTags;
-use sqlx::types::chrono::Utc;
 use std::time::Duration;
+use chrono::Utc;
+use bipa_core::node::model::Node;
 
 impl Fixture {
     pub fn create_node() -> Node {

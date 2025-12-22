@@ -47,12 +47,12 @@ mod tests {
 
         // new nodes
         for _ in 0..Fixture::random_u64_in_range(1, 100) {
-            nodes.push(Fixture::create_node(&ctx.context));
+            nodes.push(Fixture::create_node());
         }
 
         // nodes to update
         for _ in 0..Fixture::random_u64_in_range(1, 100) {
-            let mut saved_node = TestRepository::save(ctx, &Fixture::create_node(&ctx.context)).await;
+            let mut saved_node = TestRepository::save(&ctx.context, &Fixture::create_node()).await;
             saved_node.alias = Fixture::random_string(6);
             nodes.push(saved_node);
         }
@@ -63,7 +63,7 @@ mod tests {
         // then
         assert_eq!(inserted_nodes.len(), nodes.len());
 
-        let stored_nodes = TestRepository::find_all_nodes(ctx).await;
+        let stored_nodes = TestRepository::find_all_nodes(&ctx.context).await;
         for node in nodes {
             let stored_node = stored_nodes.iter().find(|n| n.public_key == node.public_key).unwrap();
             assert_eq!(stored_node.public_key, node.public_key);

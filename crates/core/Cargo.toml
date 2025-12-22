@@ -5,9 +5,6 @@ edition = "2024"
 authors = ["Deroldo <diogoderoldo@gmail.com>"]
 license = "MIT"
 
-[features]
-premium = []
-
 [dependencies]
 derust = { workspace = true }
 

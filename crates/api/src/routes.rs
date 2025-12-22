@@ -3,12 +3,14 @@ use bipa_core::state::AppState;
 use derust::envx::Environment;
 use derust::httpx::AppContext;
 use swagger_ui_dist::{ApiDefinition, OpenApiSource};
+use crate::controller::node_controller::NodeController;
 
 pub struct Routes;
 
 impl Routes {
     pub fn routes(env: &Environment) -> Router<AppContext<AppState>> {
-        let mut routes = Router::new();
+        let mut routes = Router::new()
+            .nest("/nodes", NodeController::routes());
 
         if !env.is_production() {
             routes = routes.merge(swagger());
