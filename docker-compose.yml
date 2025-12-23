@@ -26,9 +26,8 @@ services:
     environment:
       - SERVICES=secretsmanager
     volumes:
-      - "./docker/localstack.sh:/etc/localstack/init/ready.d/aws-init.sh"
-      - "./docker/localstack/secrets-manager-public.json:/etc/secrets-manager-public.json"
-      - "./docker/localstack/secrets-manager-sensitive.json:/etc/secrets-manager-sensitive.json"
+      - "./local/docker/localstack.sh:/etc/localstack/init/ready.d/aws-init.sh"
+      - "./local/docker/localstack/secrets-manager.json:/etc/secrets-manager.json"
 
 volumes:
   postgres_data:

@@ -25,5 +25,4 @@ create_or_update_secret() {
   fi
 }
 
-create_or_update_secret "bipa" "/etc/secrets-manager-public.json"
-create_or_update_secret "bipa_secrets" "/etc/secrets-manager-sensitive.json"
+create_or_update_secret "bipa_secrets" "/etc/secrets-manager.json"

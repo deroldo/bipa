@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bipa-config
+data:
+  ENVIRONMENT: "staging"
+  PORT: "3000"
+  AWS_ENDPOINT_URL: "http://bipa-localstack:4566"
+  AWS_REGION: "us-east-1"
+  AWS_ACCESS_KEY_ID: "test"
+  AWS_SECRET_ACCESS_KEY: "test"
+  DATABASE__HOST_RW: "bipa-postgres"
+  DATABASE__NAME: "local"
+  DATABASE__USER: "local"
+  DATABASE__APP_NAME: "local"
+  DATABASE__PORT: "5432"
+  DATABASE__MIN_POOL_SIZE: "1"
+  DATABASE__MAX_POOL_SIZE: "5"
+  BITCOIN_SATS: "100000000"
+  LIGHTNING_API__BASE_URL: "https://mempool.space"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bipa-postgres
+spec:
+  ports:
+    - port: 5432
+  selector:
+    app: bipa-postgres
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bipa-postgres
+spec:
+  selector:
+    matchLabels:
+      app: bipa-postgres
+  template:
+    metadata:
+      labels:
+        app: bipa-postgres
+    spec:
+      containers:
+        - name: bipa-postgres
+          image: postgres:15-alpine
+          env:
+            - name: POSTGRES_PASSWORD
+              value: "local"
+            - name: POSTGRES_USER
+              value: "local"
+            - name: POSTGRES_DB
+              value: "local"
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-init
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: postgres-init
+          hostPath:
+            path: $ROOT_DIR/database/migrations
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bipa-localstack
+spec:
+  ports:
+    - port: 4566
+      name: main
+  selector:
+    app: bipa-localstack
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bipa-localstack
+spec:
+  selector:
+    matchLabels:
+      app: bipa-localstack
+  template:
+    metadata:
+      labels:
+        app: bipa-localstack
+    spec:
+      containers:
+        - name: bipa-localstack
+          image: localstack/localstack:3.0.2
+          env:
+            - name: SERVICES
+              value: "secretsmanager"
+          ports:
+            - containerPort: 4566
+          volumeMounts:
+            - name: localstack-init
+              mountPath: /etc/localstack/init/ready.d/aws-init.sh
+            - name: secret-sensitive
+              mountPath: /etc/secrets-manager.json
+      volumes:
+        - name: localstack-init
+          hostPath:
+            path: $ROOT_DIR/local/docker/localstack.sh
+        - name: secret-sensitive
+          hostPath:
+            path: $ROOT_DIR/local/docker/localstack/secrets-manager.json

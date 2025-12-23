@@ -3,20 +3,28 @@ FROM rust:1.91.0-alpine AS builder
 
 RUN apk add --no-cache musl-dev perl make gcc openssl-dev
 
-WORKDIR /usr/
-RUN USER=root cargo new app
-WORKDIR /usr/app
+WORKDIR /app
 
+# Copy workspace manifests
 COPY Cargo.toml Cargo.lock ./
-COPY src ./src
+
+# Copy all crates
+COPY crates ./crates
+
+# Build all binaries
 RUN cargo build --release --locked
 
-# Bundle Stage
-FROM alpine:3.22.0
+# Final Stage for API
+FROM alpine:3.21 AS api
+RUN apk add --no-cache libgcc openssl
+WORKDIR /app
+COPY --from=builder /app/target/release/api /app/api
+EXPOSE 3000
+CMD ["./api"]
 
-ARG BUILD_NUMBER
-ENV DD_VERSION="${BUILD_NUMBER}"
-
-COPY --from=builder /usr/app/target/release/api /usr/app
-
-CMD ["/usr/app"]
+# Final Stage for Worker
+FROM alpine:3.21 AS worker
+RUN apk add --no-cache libgcc openssl
+WORKDIR /app
+COPY --from=builder /app/target/release/worker /app/worker
+CMD ["./worker"]

@@ -1,10 +1,49 @@
 openapi: 3.0.3
+
 info:
   title: Bipa API
   version: 0.0.1
+
 servers:
   - url: http://localhost:9095
     description: Local environment
-paths: {}
-components: {}
-tags: []
+
+paths:
+  /nodes:
+    get:
+      tags:
+        - Nodes
+      summary: Find all nodes
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NodeResponse'
+
+components:
+  schemas:
+    NodeResponse:
+      type: object
+      properties:
+        public_key:
+          type: string
+        alias:
+          type: string
+        capacity:
+          type: string
+        first_seen:
+          type: string
+          format: date-time
+      required:
+        - public_key
+        - alias
+        - capacity
+        - first_seen
+
+tags:
+  - name: Nodes
+    description: Node management

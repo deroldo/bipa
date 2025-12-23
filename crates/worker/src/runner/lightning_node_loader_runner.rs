@@ -1,73 +1,55 @@
-use bipa_core::app_context::create_app_context;
+use crate::dto::lightning_node_dto::LightningNodeResponseDto;
 use bipa_core::node::NodeUseCase;
 use bipa_core::node::model::Node;
 use bipa_core::state::AppState;
-use bipa_worker::dto::lightning_node_dto::LightningNodeResponseDto;
-use derust::databasex::PostgresDatabase;
-use derust::envx::Environment;
 use derust::httpx::{AppContext, HttpTags};
-use derust::tracex;
 use std::error::Error;
 use tracing::info;
 use uuid::Uuid;
 
-#[cfg(test)]
-pub mod test_support;
+pub struct LightningNodeLoaderRunner;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    let _guard = tracex::init();
-    info!("Bipa-worker starting");
+impl LightningNodeLoaderRunner {
+    pub async fn run(context: &AppContext<AppState>) -> Result<(), Box<dyn Error>> {
+        info!("Bipa-worker running");
+        let tags = HttpTags::from([("worker", "true"), ("traceId", &Uuid::now_v7().to_string())]);
 
-    let env = Environment::detect().ok().unwrap_or(Environment::Local);
-    let app_state = AppState::new(env).await?;
-    let database = PostgresDatabase::create_from_config(&app_state.app_config.database).await?;
-    let context = create_app_context(env, &app_state, database.clone()).await?;
+        let lightning_nodes: Vec<LightningNodeResponseDto> = context
+            .state()
+            .gateway
+            .lightning_nodes
+            .get(context, "/api/v1/lightning/nodes/rankings/connectivity", None, None, &tags)
+            .await?
+            .body
+            .unwrap_or(vec![]);
 
-    info!("Bipa-worker context loaded");
+        info!("Bipa-worker lightning nodes: {}", lightning_nodes.len());
 
-    run(&context).await
-}
+        let mut nodes = Vec::new();
+        for ln in lightning_nodes {
+            nodes.push(Node::new(
+                context.state().app_config.bitcoin_sats,
+                ln.public_key.to_string(),
+                ln.alias.to_string(),
+                ln.capacity,
+                ln.first_seen,
+                &tags,
+            )?)
+        }
 
-async fn run(context: &AppContext<AppState>) -> Result<(), Box<dyn Error>> {
-    info!("Bipa-worker running");
-    let tags = HttpTags::from([("worker", "true"), ("traceId", &Uuid::now_v7().to_string())]);
+        info!("Bipa-worker nodes: {}", nodes.len());
 
-    let lightning_nodes: Vec<LightningNodeResponseDto> = context
-        .state()
-        .gateway
-        .lightning_nodes
-        .get(context, "/api/v1/lightning/nodes/rankings/connectivity", None, None, &tags)
-        .await?
-        .body
-        .unwrap_or(vec![]);
+        let stored_nodes = NodeUseCase::insert_nodes(context, &nodes, &tags).await?;
 
-    info!("Bipa-worker lightning nodes: {}", lightning_nodes.len());
+        info!("Bipa-worker stored nodes: {}", stored_nodes.len());
 
-    let mut nodes = Vec::new();
-    for ln in lightning_nodes {
-        nodes.push(Node::new(
-            context.state().app_config.bitcoin_sats,
-            ln.public_key.to_string(),
-            ln.alias.to_string(),
-            ln.capacity,
-            ln.first_seen,
-            &tags,
-        )?)
+        Ok(())
     }
-
-    info!("Bipa-worker nodes: {}", nodes.len());
-
-    let stored_nodes = NodeUseCase::insert_nodes(context, &nodes, &tags).await?;
-
-    info!("Bipa-worker stored nodes: {}", stored_nodes.len());
-
-    Ok(())
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::runner::lightning_node_loader_runner::LightningNodeLoaderRunner;
     use crate::test_support::http_mock::HttpMock;
     use crate::test_support::worker_setup::WorkerContext;
     use bipa_core::node::NodeUseCase;
@@ -98,7 +80,7 @@ mod tests {
         HttpMock::mock_lightning_nodes(ctx, StatusCode::OK, &[ln_node_1, ln_node_2]).await;
 
         // when
-        run(&ctx.context).await?;
+        LightningNodeLoaderRunner::run(&ctx.context).await?;
 
         // then
         let nodes = NodeUseCase::find_nodes(&ctx.context, &HttpTags::default()).await?;
@@ -121,7 +103,7 @@ mod tests {
         HttpMock::mock_lightning_nodes(ctx, StatusCode::INTERNAL_SERVER_ERROR, &[]).await;
 
         // when
-        let result = run(&ctx.context).await;
+        let result = LightningNodeLoaderRunner::run(&ctx.context).await;
 
         // then
         assert!(result.is_err());
