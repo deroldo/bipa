@@ -26,7 +26,7 @@ To run the application locally with Kubernetes
 task k8s:up
 ```
 
-> [!INFO]
+> [!NOTE]
 > When the application starts, it will take 1 minute to worker start fetching data from the external API.
 > The API will return an empty array until the worker has finished.
 
@@ -47,7 +47,7 @@ To run the application api locally with Docker
 task run:api
 ```
 
-> [!INFO]
+> [!NOTE]
 > The API will return an empty array until the worker be executed once.
 
 [Link to fetch data from api standalone](http://localhost:9095/nodes)
